@@ -4,6 +4,9 @@ export interface Round {
 }
 
 export interface Score {
+  gameId: string;
+  team1Name: string;
   team1: Round[];
+  team2Name: string;
   team2: Round[];
 }

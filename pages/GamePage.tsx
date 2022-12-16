@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -8,22 +8,43 @@ import {
   StyleSheet,
   View,
   Button,
-  Modal
+  Modal,
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Scorecard, RoundForm, AllHands } from '../components';
 import { Score, Round } from '../interfaces';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const GamePage: React.FC = () => {
+interface GamePageProps {
+  route: any;
+  navigation: any;
+}
+
+export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
+  /***************************************
+   * Route Params
+   ***************************************/
+  const { gameId, isNewGame } = route.params;
+
+  /***************************************
+   * Setup
+   ***************************************/
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter
   };
 
-  const [score, setScore] = useState<Score>({ team1: [], team2: [] });
+  const [score, setScore] = useState<Score>({ gameId, team1Name: 'Team 1', team1: [], team2Name: 'Team 2', team2: [] });
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
+  /***************************************
+   * Methods
+   ***************************************/
   const onFormSave = (teamRounds: { team1: Round; team2: Round }) => {
     setScore(state => {
       const newScore = { ...state };
@@ -34,6 +55,56 @@ export const GamePage: React.FC = () => {
     setModalVisible(false);
   };
 
+  const saveGame = useCallback(() => {
+    const save = async () => {
+      return await AsyncStorage.setItem(gameId, JSON.stringify(score));
+    };
+    setSaving(true);
+    save()
+      .catch(() => {
+        Alert.alert('There was a problem saving the game.');
+      })
+      .finally(() => {
+        setSaving(false);
+      });
+  }, [setSaving, gameId, score]);
+
+  /***************************************
+   * On Load
+   ***************************************/
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <Button onPress={() => saveGame()} title="Save" />
+    });
+    console.log(gameId);
+    if (!isNewGame) {
+      const fetchGame = async (): Promise<Score | null> => {
+        const gameString = await AsyncStorage.getItem(gameId);
+        if (gameString) {
+          return JSON.parse(gameString) as Score;
+        } else {
+          return null;
+        }
+      };
+      setLoading(true);
+      fetchGame()
+        .then((savedGame: Score | null) => {
+          if (savedGame) {
+            setScore(savedGame);
+          }
+        })
+        .catch(() => {
+          Alert.alert('Could not read game data.');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [gameId, isNewGame, navigation, saveGame]);
+
+  /***************************************
+   * Render
+   ***************************************/
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -51,6 +122,16 @@ export const GamePage: React.FC = () => {
           }}>
           <RoundForm team1Name="Team 1" team2Name="Team 2" onFormSave={onFormSave} />
         </Modal>
+        <View style={styles.loaderWrapper}>
+          {saving || loading ? (
+            <View style={styles.loader}>
+              <Text>{saving ? 'Saving' : 'Loading'}</Text>
+              <ActivityIndicator />
+            </View>
+          ) : (
+            <View />
+          )}
+        </View>
         <View style={styles.container}>
           <View style={styles.teamColumn}>
             <Text style={styles.teamName}>Team 1</Text>
@@ -71,6 +152,14 @@ export const GamePage: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  loaderWrapper: {
+    marginVertical: 8
+  },
+  loader: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   container: {
     flexDirection: 'row',
     paddingTop: 24
