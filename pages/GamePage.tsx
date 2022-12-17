@@ -26,7 +26,7 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
   /***************************************
    * Route Params
    ***************************************/
-  const { gameId, isNewGame } = route.params;
+  const { game } = route.params;
 
   /***************************************
    * Setup
@@ -37,10 +37,9 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter
   };
 
-  const [score, setScore] = useState<Score>({ gameId, team1Name: 'Team 1', team1: [], team2Name: 'Team 2', team2: [] });
+  const [score, setScore] = useState<Score>(game);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
 
   /***************************************
    * Methods
@@ -56,18 +55,31 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
   };
 
   const saveGame = useCallback(() => {
+    const saveTime = new Date().toISOString();
     const save = async () => {
-      return await AsyncStorage.setItem(gameId, JSON.stringify(score));
+      return await AsyncStorage.setItem(
+        score.gameId,
+        JSON.stringify({
+          ...score,
+          lastUpdated: saveTime
+        })
+      );
     };
     setSaving(true);
     save()
+      .then(() => {
+        setScore(state => ({
+          ...state,
+          lastUpdated: saveTime
+        }));
+      })
       .catch(() => {
         Alert.alert('There was a problem saving the game.');
       })
       .finally(() => {
         setSaving(false);
       });
-  }, [setSaving, gameId, score]);
+  }, [setSaving, score]);
 
   /***************************************
    * On Load
@@ -76,31 +88,7 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
     navigation.setOptions({
       headerRight: () => <Button onPress={() => saveGame()} title="Save" />
     });
-    console.log(gameId);
-    if (!isNewGame) {
-      const fetchGame = async (): Promise<Score | null> => {
-        const gameString = await AsyncStorage.getItem(gameId);
-        if (gameString) {
-          return JSON.parse(gameString) as Score;
-        } else {
-          return null;
-        }
-      };
-      setLoading(true);
-      fetchGame()
-        .then((savedGame: Score | null) => {
-          if (savedGame) {
-            setScore(savedGame);
-          }
-        })
-        .catch(() => {
-          Alert.alert('Could not read game data.');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [gameId, isNewGame, navigation, saveGame]);
+  }, [navigation, saveGame]);
 
   /***************************************
    * Render
@@ -123,9 +111,9 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
           <RoundForm team1Name="Team 1" team2Name="Team 2" onFormSave={onFormSave} />
         </Modal>
         <View style={styles.loaderWrapper}>
-          {saving || loading ? (
+          {saving ? (
             <View style={styles.loader}>
-              <Text>{saving ? 'Saving' : 'Loading'}</Text>
+              <Text>Saving game</Text>
               <ActivityIndicator />
             </View>
           ) : (

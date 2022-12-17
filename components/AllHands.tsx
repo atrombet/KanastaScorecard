@@ -24,7 +24,7 @@ export const AllHands: React.FC<AllHandsProps> = ({ score }) => {
 const styles = StyleSheet.create({
   container: {
     borderTopWidth: 1,
-    borderColor: '#555555',
+    borderColor: '#CCCCCC',
     paddingVertical: 24,
     paddingHorizontal: 48
   },

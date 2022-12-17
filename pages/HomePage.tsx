@@ -1,10 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, StatusBar, useColorScheme, StyleSheet, Button, View } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  useColorScheme,
+  StyleSheet,
+  Button,
+  View,
+  Text,
+  ActivityIndicator
+} from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import uuid from 'react-native-uuid';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KeyValuePair } from '@react-native-async-storage/async-storage/lib/typescript/types';
 import { Score } from '../interfaces';
+import { GameList } from '../components';
+import { newGame } from '../utils';
 
 interface HomePageProps {
   navigation: any;
@@ -26,9 +38,9 @@ export const HomePage: React.FC<HomePageProps> = ({ navigation }) => {
   /***************************************
    * Methods
    ***************************************/
-  const newGame = () => {
+  const startNewGame = () => {
     const gameId = `@KanastaScore_${uuid.v4()}`;
-    navigation.navigate('Play', { gameId, isNewGame: true });
+    navigation.navigate('Play', { game: newGame(gameId) });
   };
 
   /***************************************
@@ -52,6 +64,9 @@ export const HomePage: React.FC<HomePageProps> = ({ navigation }) => {
       });
   }, []);
 
+  /***************************************
+   * Render
+   ***************************************/
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -60,8 +75,16 @@ export const HomePage: React.FC<HomePageProps> = ({ navigation }) => {
       />
       <ScrollView contentInsetAdjustmentBehavior="automatic" style={backgroundStyle}>
         <View style={styles.newGameButton}>
-          <Button title="Start a new game" onPress={() => newGame()} />
+          <Button title="Start a new game" onPress={() => startNewGame()} />
         </View>
+        {loadingGames ? (
+          <View style={styles.loading}>
+            <Text>Loading Games</Text>
+            <ActivityIndicator />
+          </View>
+        ) : (
+          <GameList games={games} />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -70,5 +93,9 @@ export const HomePage: React.FC<HomePageProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   newGameButton: {
     padding: 24
+  },
+  loading: {
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });
