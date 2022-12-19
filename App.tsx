@@ -8,8 +8,8 @@ const Stack = createNativeStackNavigator();
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Kanasta Scorecards">
-        <Stack.Screen name="Kanasta Scorecards" component={HomePage} />
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomePage} />
         <Stack.Screen name="Play" component={GamePage} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,22 +1,25 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Score } from '../interfaces';
 
 interface GameListProps {
   games: Score[];
+  onGameSelected: (game: Score) => void;
 }
 
-export const GameList: React.FC<GameListProps> = ({ games }) => {
+export const GameList: React.FC<GameListProps> = ({ games, onGameSelected }) => {
   return (
     <View style={styles.list}>
       <Text style={styles.title}>Saved Games</Text>
       {games.map(game => (
-        <View key={game.gameId} style={styles.game}>
-          <Text style={styles.versus}>
-            {game.team1Name} vs. {game.team2Name}
-          </Text>
-          <Text style={styles.date}>{new Date(game.lastUpdated).toLocaleDateString()}</Text>
-        </View>
+        <TouchableOpacity key={game.gameId} onPress={() => onGameSelected(game)}>
+          <View style={styles.game}>
+            <Text style={styles.versus}>
+              {game.team1Name} vs. {game.team2Name}
+            </Text>
+            <Text style={styles.date}>{new Date(game.lastUpdated).toLocaleDateString()}</Text>
+          </View>
+        </TouchableOpacity>
       ))}
     </View>
   );

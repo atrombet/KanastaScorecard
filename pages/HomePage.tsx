@@ -43,6 +43,10 @@ export const HomePage: React.FC<HomePageProps> = ({ navigation }) => {
     navigation.navigate('Play', { game: newGame(gameId) });
   };
 
+  const continueGame = (game: Score) => {
+    navigation.navigate('Play', { game });
+  };
+
   /***************************************
    * On Load
    ***************************************/
@@ -83,7 +87,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigation }) => {
             <ActivityIndicator />
           </View>
         ) : (
-          <GameList games={games} />
+          <GameList games={games} onGameSelected={continueGame} />
         )}
       </ScrollView>
     </SafeAreaView>
