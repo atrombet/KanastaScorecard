@@ -12,9 +12,9 @@ export const AllHands: React.FC<AllHandsProps> = ({ score }) => {
       <Text style={styles.title}>Completed hands</Text>
       {score.team1.map((_, index: number) => (
         <View key={index.toString()} style={styles.row}>
-          <Text>{score.team1[index].kanastaPoints + score.team1[index].cardPoints}</Text>
+          <Text style={styles.roundValue}>{score.team1[index].kanastaPoints + score.team1[index].cardPoints}</Text>
           <Text style={styles.roundLabel}>Hand {index + 1}</Text>
-          <Text>{score.team2[index].kanastaPoints + score.team2[index].cardPoints}</Text>
+          <Text style={styles.roundValue}>{score.team2[index].kanastaPoints + score.team2[index].cardPoints}</Text>
         </View>
       ))}
     </View>
@@ -37,13 +37,17 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12
   },
   roundLabel: {
     fontSize: 18,
     fontWeight: '600',
-    flexGrow: 1,
+    textAlign: 'center',
+    width: '50%'
+  },
+  roundValue: {
+    width: '25%',
     textAlign: 'center'
   }
 });

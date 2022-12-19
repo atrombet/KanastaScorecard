@@ -1,18 +1,11 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { Round } from '../interfaces';
 
 interface ScorecardProps {
-  rounds: Round[];
+  total: number;
 }
 
-export const Scorecard: React.FC<ScorecardProps> = ({ rounds }) => {
-  const total = rounds.length
-    ? rounds.reduce((set: number, round: Round): number => {
-        return set + round.kanastaPoints + round.cardPoints;
-      }, 0)
-    : 0;
-
+export const Scorecard: React.FC<ScorecardProps> = ({ total }) => {
   const laydown = (currentScore: number) => {
     if (currentScore < 3000) {
       return 50;

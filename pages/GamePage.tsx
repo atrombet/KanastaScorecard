@@ -44,6 +44,32 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
   /***************************************
    * Methods
    ***************************************/
+  const team1Total = useCallback(() => {
+    return score.team1.length
+      ? score.team1.reduce((set: number, round: Round): number => {
+          return set + round.kanastaPoints + round.cardPoints;
+        }, 0)
+      : 0;
+  }, [score]);
+
+  const team2Total = useCallback(() => {
+    return score.team2.length
+      ? score.team2.reduce((set: number, round: Round): number => {
+          return set + round.kanastaPoints + round.cardPoints;
+        }, 0)
+      : 0;
+  }, [score]);
+
+  const determineWinner = useCallback(() => {
+    const total1 = team1Total();
+    const total2 = team2Total();
+    if (total1 >= 20000 || total2 >= 20000) {
+      return total1 > total2 ? 'team1' : 'team2';
+    } else {
+      return null;
+    }
+  }, [team1Total, team2Total]);
+
   const onFormSave = (teamRounds: { team1: Round; team2: Round }) => {
     setScore(state => {
       const newScore = { ...state };
@@ -56,12 +82,14 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
 
   const saveGame = useCallback(() => {
     const saveTime = new Date().toISOString();
+    const winner = determineWinner();
     const save = async () => {
       return await AsyncStorage.setItem(
         score.gameId,
         JSON.stringify({
           ...score,
-          lastUpdated: saveTime
+          lastUpdated: saveTime,
+          winner
         })
       );
     };
@@ -70,7 +98,8 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
       .then(() => {
         setScore(state => ({
           ...state,
-          lastUpdated: saveTime
+          lastUpdated: saveTime,
+          winner
         }));
       })
       .catch(() => {
@@ -79,10 +108,10 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
       .finally(() => {
         setSaving(false);
       });
-  }, [setSaving, score]);
+  }, [setSaving, score, determineWinner]);
 
   /***************************************
-   * On Load
+   * Hooks
    ***************************************/
   useEffect(() => {
     navigation.setOptions({
@@ -108,7 +137,7 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
           onRequestClose={() => {
             setModalVisible(false);
           }}>
-          <RoundForm team1Name="Team 1" team2Name="Team 2" onFormSave={onFormSave} />
+          <RoundForm team1Name={score.team1Name} team2Name={score.team2Name} onFormSave={onFormSave} />
         </Modal>
         <View style={styles.loaderWrapper}>
           {saving ? (
@@ -122,12 +151,14 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
         </View>
         <View style={styles.container}>
           <View style={styles.teamColumn}>
-            <Text style={styles.teamName}>Team 1</Text>
-            <Scorecard rounds={score.team1} />
+            {determineWinner() === 'team1' ? <Text style={styles.winner}>Winner!</Text> : <></>}
+            <Text style={styles.teamName}>{score.team1Name}</Text>
+            <Scorecard total={team1Total()} />
           </View>
           <View style={styles.teamColumn}>
-            <Text style={styles.teamName}>Team 2</Text>
-            <Scorecard rounds={score.team2} />
+            {determineWinner() === 'team2' ? <Text style={styles.winner}>Winner!</Text> : <></>}
+            <Text style={styles.teamName}>{score.team2Name}</Text>
+            <Scorecard total={team2Total()} />
           </View>
         </View>
         <View style={styles.recordButton}>
@@ -155,6 +186,12 @@ const styles = StyleSheet.create({
   teamColumn: {
     width: '50%',
     paddingHorizontal: 8
+  },
+  winner: {
+    fontSize: 16,
+    fontWeight: '300',
+    marginTop: -20,
+    textAlign: 'center'
   },
   teamName: {
     textAlign: 'center',

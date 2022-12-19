@@ -17,6 +17,7 @@ export const GameList: React.FC<GameListProps> = ({ games, onGameSelected }) => 
             <Text style={styles.versus}>
               {game.team1Name} vs. {game.team2Name}
             </Text>
+            <Text>{game.winner ? game[`${game.winner}Name`] + ' wins!' : undefined}</Text>
             <Text style={styles.date}>{new Date(game.lastUpdated).toLocaleDateString()}</Text>
           </View>
         </TouchableOpacity>

@@ -10,4 +10,5 @@ export interface Score {
   team1: Round[];
   team2Name: string;
   team2: Round[];
+  winner: 'team1' | 'team2' | null;
 }
