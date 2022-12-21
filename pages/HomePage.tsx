@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -17,6 +17,7 @@ import { KeyValuePair } from '@react-native-async-storage/async-storage/lib/type
 import { Score } from '../interfaces';
 import { GameList } from '../components';
 import { newGame } from '../utils';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface HomePageProps {
   navigation: any;
@@ -48,25 +49,26 @@ export const HomePage: React.FC<HomePageProps> = ({ navigation }) => {
   };
 
   /***************************************
-   * On Load
+   * Hooks
    ***************************************/
-  useEffect(() => {
-    const getGames = async (): Promise<readonly KeyValuePair[]> => {
-      const keys = await AsyncStorage.getAllKeys();
-      const filteredKeys = keys.filter(key => key.indexOf('@KanastaScore_') > -1);
-      return filteredKeys.length ? await AsyncStorage.multiGet(filteredKeys) : Promise.resolve([]);
-    };
-
-    setLoadingGames(true);
-    getGames()
-      .then((stringGames: readonly KeyValuePair[]) => {
-        setGames(stringGames.map((keyVal: KeyValuePair) => ({ ...JSON.parse(keyVal[1] || ''), gameId: keyVal[0] })));
-      })
-      .catch(() => {})
-      .finally(() => {
-        setLoadingGames(false);
-      });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const getGames = async (): Promise<readonly KeyValuePair[]> => {
+        const keys = await AsyncStorage.getAllKeys();
+        const filteredKeys = keys.filter(key => key.indexOf('@KanastaScore_') > -1);
+        return filteredKeys.length ? await AsyncStorage.multiGet(filteredKeys) : Promise.resolve([]);
+      };
+      setLoadingGames(true);
+      getGames()
+        .then((stringGames: readonly KeyValuePair[]) => {
+          setGames(stringGames.map((keyVal: KeyValuePair) => ({ ...JSON.parse(keyVal[1] || ''), gameId: keyVal[0] })));
+        })
+        .catch(() => {})
+        .finally(() => {
+          setLoadingGames(false);
+        });
+    }, [])
+  );
 
   /***************************************
    * Render
