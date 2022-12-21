@@ -10,10 +10,11 @@ import {
   Button,
   Modal,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Pressable
 } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { Scorecard, RoundForm, AllHands } from '../components';
+import { Scorecard, RoundForm, AllHands, NameForm } from '../components';
 import { Score, Round } from '../interfaces';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -38,7 +39,8 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
   };
 
   const [score, setScore] = useState<Score>(game);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [roundFormVisible, setRoundFormVisible] = useState<boolean>(false);
+  const [nameFormVisible, setNameFormVisible] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
 
   /***************************************
@@ -70,14 +72,19 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
     }
   }, [team1Total, team2Total]);
 
-  const onFormSave = (teamRounds: { team1: Round; team2: Round }) => {
+  const onRoundFormSave = (teamRounds: { team1: Round; team2: Round }) => {
     setScore(state => {
       const newScore = { ...state };
       newScore.team1.push(teamRounds.team1);
       newScore.team2.push(teamRounds.team2);
       return newScore;
     });
-    setModalVisible(false);
+    setRoundFormVisible(false);
+  };
+
+  const onNameFormSave = (team1Name: string, team2Name: string) => {
+    setScore(state => ({ ...state, team1Name, team2Name }));
+    setNameFormVisible(false);
   };
 
   const saveGame = useCallback(() => {
@@ -133,11 +140,24 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
           animationType="slide"
           presentationStyle="formSheet"
           transparent={false}
-          visible={modalVisible}
+          visible={roundFormVisible}
           onRequestClose={() => {
-            setModalVisible(false);
+            setRoundFormVisible(false);
           }}>
-          <RoundForm team1Name={score.team1Name} team2Name={score.team2Name} onFormSave={onFormSave} />
+          <RoundForm team1Name={score.team1Name} team2Name={score.team2Name} onFormSave={onRoundFormSave} />
+        </Modal>
+        <Modal
+          animationType="slide"
+          presentationStyle="formSheet"
+          transparent={false}
+          visible={nameFormVisible}
+          onRequestClose={() => {
+            setNameFormVisible(false);
+          }}>
+          <NameForm
+            initValues={{ team1Name: score.team1Name, team2Name: score.team2Name }}
+            onFormSave={onNameFormSave}
+          />
         </Modal>
         <View style={styles.loaderWrapper}>
           {saving ? (
@@ -152,17 +172,21 @@ export const GamePage: React.FC<GamePageProps> = ({ route, navigation }) => {
         <View style={styles.container}>
           <View style={styles.teamColumn}>
             {determineWinner() === 'team1' ? <Text style={styles.winner}>Winner!</Text> : <></>}
-            <Text style={styles.teamName}>{score.team1Name}</Text>
+            <Pressable onPress={() => setNameFormVisible(true)}>
+              <Text style={styles.teamName}>{score.team1Name}</Text>
+            </Pressable>
             <Scorecard total={team1Total()} />
           </View>
           <View style={styles.teamColumn}>
             {determineWinner() === 'team2' ? <Text style={styles.winner}>Winner!</Text> : <></>}
-            <Text style={styles.teamName}>{score.team2Name}</Text>
+            <Pressable onPress={() => setNameFormVisible(true)}>
+              <Text style={styles.teamName}>{score.team2Name}</Text>
+            </Pressable>
             <Scorecard total={team2Total()} />
           </View>
         </View>
         <View style={styles.recordButton}>
-          <Button title="Record a hand" onPress={() => setModalVisible(true)} />
+          <Button title="Record a hand" onPress={() => setRoundFormVisible(true)} />
         </View>
         <AllHands score={score} />
       </ScrollView>

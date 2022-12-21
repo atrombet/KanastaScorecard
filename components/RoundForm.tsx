@@ -65,7 +65,7 @@ export const RoundForm: React.FC<RoundModalProps> = ({ team1Name, team2Name, onF
             <Text style={styles.label}>Kanasta Points</Text>
             <TextInput
               style={styles.input}
-              keyboardType="number-pad"
+              keyboardType="numeric"
               placeholder="Enter points"
               onChangeText={value => updateRound(value, 'team1', 'kanastas')}
               value={round.team1.kanastas}
@@ -75,7 +75,7 @@ export const RoundForm: React.FC<RoundModalProps> = ({ team1Name, team2Name, onF
             <Text style={styles.label}>Card Points</Text>
             <TextInput
               style={styles.input}
-              keyboardType="number-pad"
+              keyboardType="numeric"
               placeholder="Enter points"
               onChangeText={value => updateRound(value, 'team1', 'cards')}
               value={round.team1.cards}
