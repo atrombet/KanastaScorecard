@@ -39,7 +39,7 @@ export const NameForm: React.FC<NameFormProps> = ({ initValues, onFormSave }) =>
           <Text style={styles.teamName}>Team 1 Name</Text>
           <TextInput
             style={styles.input}
-            keyboardType="numeric"
+            returnKeyType="done"
             placeholder="Enter team name"
             onChangeText={value => updateName(value, 'team1Name')}
             value={names.team1Name}
@@ -49,7 +49,7 @@ export const NameForm: React.FC<NameFormProps> = ({ initValues, onFormSave }) =>
           <Text style={styles.teamName}>Team 2 Name</Text>
           <TextInput
             style={styles.input}
-            keyboardType="numeric"
+            returnKeyType="done"
             placeholder="Enter team name"
             onChangeText={value => updateName(value, 'team2Name')}
             value={names.team2Name}
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 12,
     borderRadius: 4,
-    borderColor: '#555555170'
+    borderColor: '#555555'
   },
   saveButton: {
     textAlign: 'right',

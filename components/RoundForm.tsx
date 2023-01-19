@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { TextInput, View, Text, StyleSheet, SafeAreaView, useColorScheme, Pressable } from 'react-native';
+import {
+  TextInput,
+  View,
+  Text,
+  StyleSheet,
+  useColorScheme,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView
+} from 'react-native';
 import { Round } from '../interfaces';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
@@ -58,64 +68,76 @@ export const RoundForm: React.FC<RoundModalProps> = ({ team1Name, team2Name, onF
       <Pressable onPress={() => saveRound()}>
         <Text style={styles.saveButton}>Save</Text>
       </Pressable>
-      <View style={styles.container}>
-        <View style={styles.group}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <View style={styles.container}>
           <Text style={styles.teamName}>{team1Name}</Text>
-          <View>
-            <Text style={styles.label}>Kanasta Points</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="Enter points"
-              onChangeText={value => updateRound(value, 'team1', 'kanastas')}
-              value={round.team1.kanastas}
-            />
+          <View style={styles.teamGroup}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Canastas</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Enter points"
+                returnKeyType="done"
+                onChangeText={value => updateRound(value, 'team1', 'kanastas')}
+                value={round.team1.kanastas}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Cards</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Enter points"
+                returnKeyType="done"
+                onChangeText={value => updateRound(value, 'team1', 'cards')}
+                value={round.team1.cards}
+              />
+            </View>
           </View>
-          <View>
-            <Text style={styles.label}>Card Points</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="Enter points"
-              onChangeText={value => updateRound(value, 'team1', 'cards')}
-              value={round.team1.cards}
-            />
-          </View>
-        </View>
-        <View style={styles.group}>
           <Text style={styles.teamName}>{team2Name}</Text>
-          <View>
-            <Text style={styles.label}>Kanasta Points</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="number-pad"
-              placeholder="Enter points"
-              onChangeText={value => updateRound(value, 'team2', 'kanastas')}
-              value={round.team2.kanastas}
-            />
-          </View>
-          <View>
-            <Text style={styles.label}>Card Points</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="number-pad"
-              placeholder="Enter points"
-              onChangeText={value => updateRound(value, 'team2', 'cards')}
-              value={round.team2.cards}
-            />
+          <View style={styles.teamGroup}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Canastas</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="number-pad"
+                placeholder="Enter points"
+                returnKeyType="done"
+                onChangeText={value => updateRound(value, 'team2', 'kanastas')}
+                value={round.team2.kanastas}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Cards</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="number-pad"
+                placeholder="Enter points"
+                returnKeyType="done"
+                onChangeText={value => updateRound(value, 'team2', 'cards')}
+                value={round.team2.cards}
+              />
+            </View>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 24
+    paddingHorizontal: 24,
+    paddingBottom: 36
   },
-  group: {
-    paddingBottom: 24
+  teamGroup: {
+    paddingBottom: 24,
+    flexDirection: 'row',
+    gap: 8
+  },
+  inputGroup: {
+    flex: 1
   },
   teamName: {
     fontSize: 24,
@@ -133,7 +155,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 12,
     borderRadius: 4,
-    borderColor: '#555555170'
+    borderColor: '#555555'
   },
   saveButton: {
     textAlign: 'right',
